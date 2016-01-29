@@ -5,14 +5,14 @@ This repository is used to work with [shiny](http://shiny.rstudio.com/) in order
 Still to do:
 
 1. Verteilungen:
-  * Binomial
-  * Poisson
-  * Exponential
-  * Normal
-  * t
-  * Chi-square
-  * F
-  * Uniform
+  * [x] Binomial
+  * [ ] Poisson
+  * [x] Exponential
+  * [x] Normal
+  * [ ] t
+  * [ ] Chi-square
+  * [ ] F
+  * [ ] Uniform
 2. Default range
 3. Default smoothing
 4. Maybe multiple functions in one picture
