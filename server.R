@@ -144,6 +144,12 @@ shinyServer(function(input, output) {
     ))
   })
   
+  ##############################################################################
+  #                                                                            #
+  #                           Advanced Options                                 #
+  #                                                                            #
+  ##############################################################################
+  
   output$option.range <- renderUI({
     allowed.Ranges <- allowed.Ranges(input);
     sI <-
@@ -163,6 +169,12 @@ shinyServer(function(input, output) {
     if (input$dist != 'Binomial distribution')
       numericInput('n','Smoothing points',101)
   })
+  
+  ##############################################################################
+  #                                                                            #
+  #                           Plotting Distr.                                  #
+  #                                                                            #
+  ##############################################################################
   
   output$dist.Plot <- renderPlot({
     nplot()
@@ -280,5 +292,22 @@ shinyServer(function(input, output) {
       }
     );
     return(outplot)
+  })
+  
+  ##############################################################################
+  #                                                                            #
+  #                           Hypothesis Testing                               #
+  #                                                                            #
+  ##############################################################################
+  
+  output$hypothesis.p <- renderUI({
+    list(numericInput("hypothesis.p.value", "p value", 0.05, min = 0, max = 1),
+         checkboxInput("draw.hypothesis.p.value", "Use the p value", FALSE)
+         )
+  })
+  output$hypothesis.crit <- renderUI({list(
+    numericInput("hypothesis.crit.value", "Critical Value", 1.96, step = 0.01),
+    checkboxInput("draw.hypothesis.p.value", "Use the critical value", FALSE)
+  )
   })
 })
