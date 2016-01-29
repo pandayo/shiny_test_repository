@@ -4,7 +4,7 @@ This repository is used to work with [shiny](http://shiny.rstudio.com/) in order
 
 Still to do:
 
-1. Verteilungen:
+1. **Verteilungen:**
   * [x] Binomial
   * [x] Poisson
   * [x] Exponential
@@ -13,10 +13,10 @@ Still to do:
   * [x] Chi-square
   * [x] F
   * [x] Uniform
-2. [x] Default range
-3. [x] Default smoothing
-4. [ ] Maybe multiple functions in one picture
-5. [ ] md/text + shiny in one
-6. [ ] Help text
-7. [x] Dropdown: stuff: line/smooth, points, bars
-8. [ ] Hypothesis-tests
+2. **Default range**
+3. **Default smoothing**
+4. Maybe multiple functions in one picture
+5. md/text + shiny in one
+6. Help text
+7. **Dropdown: stuff: line/smooth, points, bars**
+8. Hypothesis-tests
