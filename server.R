@@ -1,7 +1,7 @@
 library(shiny)
 library(ggplot2)
 
-
+# Define the ranges, the different distributions are allowed to use
 allowed.Ranges <- function(input) {
   return(switch(
     input$dist,
@@ -22,14 +22,27 @@ allowed.Ranges <- function(input) {
     },
     'Chi-Square' = {
       c(0,100,0,5)
+    },
+    'Poisson distribution' = {
+      c(0,100,0,5)
+    },
+    't-distribution' = {
+      c(-50,50,-5,5)
+    },
+    'F-distribution' = {
+      c(0,50,0,5)
+    },
+    'Uniform distribution' = {
+      c(-50,50,-5,5)
     }
   ))
 }
 
-# Define server logic required to draw a histogram
 shinyServer(function(input, output) {
-  output$distoptions <- renderUI({
-    switch(
+  #render the options by the distribution
+  output$dist.options <- renderUI({
+    allowed.Ranges <- allowed.Ranges(input);
+    return(switch(
       input$dist,
       'Normal distribution' = {
         list(
@@ -57,7 +70,7 @@ shinyServer(function(input, output) {
         list(
           helpText("Enter the parameters below:"),
           numericInput(
-            inputId = 'rate',label = 'rate', value = 1
+            inputId = 'rate',label = 'λ', value = 1
           )
         )
       },
@@ -90,15 +103,52 @@ shinyServer(function(input, output) {
             inputId = 'df',label = 'Degrees of Freedom', value = 1
           )
         )
+      },
+      'Poisson distribution' = {
+        list(
+          helpText("Enter the parameters below:"),
+          numericInput(
+            inputId = 'lambda',label = 'λ', value = 1
+          )
+        )
+      },
+      't-distribution' = {
+        list(
+          helpText("Enter the parameters below:"),
+          numericInput(
+            inputId = 'df',label = 'Degrees of Freedom', value = 1
+          )
+        )
+      },
+      'F-distribution' = {
+        list(
+          helpText("Enter the parameters below:"),
+          numericInput(
+            inputId = 'df1',label = 'Degrees of Freedom No. 1', value = 10
+          ),
+          numericInput(
+            inputId = 'df2',label = 'Degrees of Freedom No. 2', value = 5
+          )
+        )
+      },
+      'Uniform distribution' = {
+        list(
+          helpText("Enter the parameters below:"),
+          sliderInput(
+            "dist.range", "distribution limit", min = allowed.Ranges[1]+1,
+            max = allowed.Ranges[2]-1,
+            value = c(allowed.Ranges[3]+1, allowed.Ranges[4]-1)
+          )
+        )
       }
-    )
+    ))
   })
   
   output$option.range <- renderUI({
     allowed.Ranges <- allowed.Ranges(input);
     sI <-
       sliderInput(
-        "range", "x-axis length", min = allowed.Ranges[1],
+        "draw.range", "x-axis length", min = allowed.Ranges[1],
         max = allowed.Ranges[2],
         value = c(allowed.Ranges[3], allowed.Ranges[4])
       );
@@ -114,15 +164,16 @@ shinyServer(function(input, output) {
       numericInput('n','Smoothing points',101)
   })
   
-  output$distPlot <- renderPlot({
+  output$dist.Plot <- renderPlot({
     nplot()
   })
   
-  nplot <- eventReactive(input$draw, {
-    if (is.null(input$range)) {
+  # Plotting the distributions
+  nplot <- eventReactive(input$draw.Plot, {
+    if (is.null(input$draw.range)) {
       outputrange <- allowed.Ranges(input)[3:4];
     }else{
-      outputrange <- input$range;
+      outputrange <- input$draw.range;
     }
     if (is.null(input$geom)) {
       geom <- "line"
@@ -191,6 +242,38 @@ shinyServer(function(input, output) {
         outplot <- outplot + stat_function(
           fun = dchisq, args =
             list(df = input$df),
+          geom = geom,
+          n = n
+        )
+      },
+      'Poisson distribution' = {
+        outplot <- outplot + stat_function(
+          fun = dpois, args =
+            list(lambda = input$lambda),
+          geom = geom,
+          n = n
+        )
+      },
+      't-distribution' = {
+        outplot <- outplot + stat_function(
+          fun = dt, args =
+            list(df = input$df),
+          geom = geom,
+          n = n
+        )
+      },
+      'F-distribution' = {
+        outplot <- outplot + stat_function(
+          fun = df, args =
+            list(df1 = input$df1, df2 = input$df2),
+          geom = geom,
+          n = n
+        )
+      },
+      'Uniform distribution' = {
+        outplot <- outplot + stat_function(
+          fun = dunif, args =
+            list(min = input$dist.range[1], max = input$dist.range[2]),
           geom = geom,
           n = n
         )

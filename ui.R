@@ -14,11 +14,12 @@ shinyUI(fluidPage(
                  c(
                    'Normal distribution','Log-normal distribution',
                    'Exponential distribution','Beta distribution',
-                   'Binomial distribution','Chi-Square'
+                   'Binomial distribution','Chi-Square','Poisson distribution',
+                   't-distribution','F-distribution','Uniform distribution'
                  )
                )
              ),
-             fluidRow(uiOutput('distoptions'))
+             fluidRow(uiOutput('dist.options'))
            ),
            tabPanel("Options",
                     fluidRow(
@@ -28,7 +29,7 @@ shinyUI(fluidPage(
                     ))
          ),
          fluidRow(actionButton(
-           "draw","Draw function"
+           "draw.Plot","Draw distribution"
          ))),
-  mainPanel(plotOutput('distPlot'))
+  mainPanel(plotOutput('dist.Plot'))
 ))
