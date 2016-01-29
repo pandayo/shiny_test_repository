@@ -3,6 +3,7 @@
 This repository is used to work with [shiny](http://shiny.rstudio.com/) in order to create an interactive plotting tool for distribution functions used in econometrics.
 
 Still to do:
+
 1. Verteilungen:
   * Binomial
   * Poisson
@@ -12,7 +13,6 @@ Still to do:
   * Chi-square
   * F
   * Uniform
-
 2. Default range
 3. Default smoothing
 4. Maybe multiple functions in one picture
