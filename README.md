@@ -12,6 +12,7 @@ Still to do:
   * Chi-square
   * F
   * Uniform
+
 2. Default range
 3. Default smoothing
 4. Maybe multiple functions in one picture
