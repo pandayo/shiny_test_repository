@@ -38,6 +38,179 @@ allowed.Ranges <- function(input) {
   ))
 }
 
+
+
+hypothesis.plot <- function(input) {
+  if (is.null(input$draw.range)) {
+    outputrange <- allowed.Ranges(input)[3:4];
+  }else{
+    outputrange <- input$draw.range;
+  }
+  switch(
+    input$test.type,
+    'Two-Sided' = {
+      return(switch(
+        input$dist,
+        'Normal distribution' = {
+          sf <- c();
+          sf <- cbind(sf, geom_area(
+            data =
+              subset(
+                data.plot, x <= qnorm(
+                  (input$hypothesis.p.value / 2), mean = input$mu, sd = input$sigma
+                )
+              ),
+            aes(x,dnorm(
+              x,mean = input$mu,sd = input$sigma
+            )), fill = 'blue', alpha = 0.5
+          ));
+          sf <- cbind(sf, geom_area(
+            data =
+              subset(
+                data.plot, x >= qnorm(
+                  1-(input$hypothesis.p.value / 2), mean = input$mu, sd = input$sigma
+                )
+              ),
+            aes(x,dnorm(
+              x,mean = input$mu,sd = input$sigma
+            )), fill = 'blue', alpha = 0.5
+          ));
+        },
+        'Log-normal distribution' = {
+          c(-1,100,0,5)
+        },
+        'Exponential distribution' = {
+          c(-1,100,0,5)
+        },
+        'Beta distribution' = {
+          c(-50,50,-5,5)
+        },
+        'Binomial distribution' = {
+          c(0,100,0,input$size)
+        },
+        'Chi-Square' = {
+          c(0,100,0,5)
+        },
+        'Poisson distribution' = {
+          c(0,100,0,5)
+        },
+        't-distribution' = {
+          c(-50,50,-5,5)
+        },
+        'F-distribution' = {
+          c(0,50,0,5)
+        },
+        'Uniform distribution' = {
+          c(-50,50,-5,5)
+        }
+      ))
+    },
+    'Left-Sided' = {
+      border <-
+        qnorm(input$hypothesis.p.value, mean = input$mu, sd = input$sigma);
+      return(switch(
+        input$dist,
+        'Normal distribution' = {
+          sf <- geom_area(
+            data =
+              subset(
+                data.plot, x < qnorm(
+                  input$hypothesis.p.value,mean = input$mu, sd = input$sigma
+                )
+              ),
+            aes(x,dnorm(
+              x,mean = input$mu,sd = input$sigma
+            )), fill = 'blue', alpha = 0.5
+          );
+        },
+        'Log-normal distribution' = {
+          c(-1,100,0,5)
+        },
+        'Exponential distribution' = {
+          c(-1,100,0,5)
+        },
+        'Beta distribution' = {
+          c(-50,50,-5,5)
+        },
+        'Binomial distribution' = {
+          c(0,100,0,input$size)
+        },
+        'Chi-Square' = {
+          c(0,100,0,5)
+        },
+        'Poisson distribution' = {
+          c(0,100,0,5)
+        },
+        't-distribution' = {
+          c(-50,50,-5,5)
+        },
+        'F-distribution' = {
+          c(0,50,0,5)
+        },
+        'Uniform distribution' = {
+          c(-50,50,-5,5)
+        }
+      ))
+      
+    },
+    'Right-Sided' = {
+      border <-
+        qnorm(1 - input$hypothesis.p.value, mean = input$mu, sd = input$sigma);
+      return(switch(
+        input$dist,
+        'Normal distribution' = {
+          sf <- geom_area(
+            data =
+              subset(
+                data.plot, x > qnorm(
+                  1-input$hypothesis.p.value,mean = input$mu, sd = input$sigma
+                )
+              ),
+            aes(x,dnorm(
+              x,mean = input$mu,sd = input$sigma
+            )), fill = 'blue', alpha = 0.5
+          );
+        },
+        'Log-normal distribution' = {
+          c(-1,100,0,5)
+        },
+        'Exponential distribution' = {
+          c(-1,100,0,5)
+        },
+        'Beta distribution' = {
+          c(-50,50,-5,5)
+        },
+        'Binomial distribution' = {
+          c(0,100,0,input$size)
+        },
+        'Chi-Square' = {
+          c(0,100,0,5)
+        },
+        'Poisson distribution' = {
+          c(0,100,0,5)
+        },
+        't-distribution' = {
+          c(-50,50,-5,5)
+        },
+        'F-distribution' = {
+          c(0,50,0,5)
+        },
+        'Uniform distribution' = {
+          c(-50,50,-5,5)
+        }
+      ))
+    }
+  );
+  return(sf);
+}
+
+
+##############################################################################
+#                                                                            #
+#                               Shiny Server                                 #
+#                                                                            #
+##############################################################################
+
 shinyServer(function(input, output) {
   #render the options by the distribution
   output$dist.options <- renderUI({
@@ -135,9 +308,9 @@ shinyServer(function(input, output) {
         list(
           helpText("Enter the parameters below:"),
           sliderInput(
-            "dist.range", "distribution limit", min = allowed.Ranges[1]+1,
-            max = allowed.Ranges[2]-1,
-            value = c(allowed.Ranges[3]+1, allowed.Ranges[4]-1)
+            "dist.range", "distribution limit", min = allowed.Ranges[1] + 1,
+            max = allowed.Ranges[2] - 1,
+            value = c(allowed.Ranges[3] + 1, allowed.Ranges[4] - 1)
           )
         )
       }
@@ -198,7 +371,10 @@ shinyServer(function(input, output) {
       n <- input$n;
     }
     outplot <-
-      ggplot(data.frame(x = c(outputrange[1],outputrange[2])), aes(x));
+      ggplot(data.plot <-
+               data.frame(x = seq(
+                 outputrange[1],outputrange[2],abs(outputrange[1] - outputrange[2]) / n
+               )), aes(x));
     switch(
       input$dist,
       'Normal distribution' = {
@@ -285,13 +461,119 @@ shinyServer(function(input, output) {
       'Uniform distribution' = {
         outplot <- outplot + stat_function(
           fun = dunif, args =
-            list(min = input$dist.range[1], max = input$dist.range[2]),
+            list(
+              min = input$dist.range[1], max = input$dist.range[2]
+            ),
           geom = geom,
           n = n
         )
       }
     );
+    if (input$draw.Plot.Hypothesis) {
+      # More of that ugly work around
+      if (is.array(y <- hypothesis.plot(input))) {
+        outplot <- outplot + y;
+      }else{
+        outplot <- outplot + y;
+      }
+    }
     return(outplot)
+  })
+  
+  ##############################################################################
+  #                                                                            #
+  #                        Distribution Information                            #
+  #                                                                            #
+  ##############################################################################
+  
+  output$dist.Info <- renderUI({
+    withMathJax(ninfo())
+  })
+  
+  ninfo <- eventReactive(input$draw.Plot, {
+    switch(
+      input$dist,
+      'Normal distribution' = {
+        HTML(
+          paste(
+            'The drawn distribution is the normal distribution. It is defined by it\'s mean, \\(\\mu\\), and it\'s variance, \\(\\sigma^2\\).','For the usage of newline equations, use this: $$\\sigma^2.$$', sep =
+              "<br/>"
+          )
+        )
+      },
+      'Log-normal distribution' = {
+        HTML(
+          paste(
+            'The drawn distribution is the normal distribution. It is defined by it\'s mean, \\(\\mu\\), and it\'s variance, \\(\\sigma^2\\).','For the usage of newline equations, use this: $$\\sigma^2.$$', sep =
+              "<br/>"
+          )
+        )
+      },
+      'Exponential distribution' = {
+        HTML(
+          paste(
+            'The drawn distribution is the normal distribution. It is defined by it\'s mean, \\(\\mu\\), and it\'s variance, \\(\\sigma^2\\).','For the usage of newline equations, use this: $$\\sigma^2.$$', sep =
+              "<br/>"
+          )
+        )
+      },
+      'Beta distribution' = {
+        HTML(
+          paste(
+            'The drawn distribution is the normal distribution. It is defined by it\'s mean, \\(\\mu\\), and it\'s variance, \\(\\sigma^2\\).','For the usage of newline equations, use this: $$\\sigma^2.$$', sep =
+              "<br/>"
+          )
+        )
+      },
+      'Binomial distribution' = {
+        HTML(
+          paste(
+            'The drawn distribution is the normal distribution. It is defined by it\'s mean, \\(\\mu\\), and it\'s variance, \\(\\sigma^2\\).','For the usage of newline equations, use this: $$\\sigma^2.$$', sep =
+              "<br/>"
+          )
+        )
+      },
+      'Chi-Square' = {
+        HTML(
+          paste(
+            'The drawn distribution is the normal distribution. It is defined by it\'s mean, \\(\\mu\\), and it\'s variance, \\(\\sigma^2\\).','For the usage of newline equations, use this: $$\\sigma^2.$$', sep =
+              "<br/>"
+          )
+        )
+      },
+      'Poisson distribution' = {
+        HTML(
+          paste(
+            'The drawn distribution is the normal distribution. It is defined by it\'s mean, \\(\\mu\\), and it\'s variance, \\(\\sigma^2\\).','For the usage of newline equations, use this: $$\\sigma^2.$$', sep =
+              "<br/>"
+          )
+        )
+      },
+      't-distribution' = {
+        HTML(
+          paste(
+            'The drawn distribution is the normal distribution. It is defined by it\'s mean, \\(\\mu\\), and it\'s variance, \\(\\sigma^2\\).','For the usage of newline equations, use this: $$\\sigma^2.$$', sep =
+              "<br/>"
+          )
+        )
+      },
+      'F-distribution' = {
+        HTML(
+          paste(
+            'The drawn distribution is the normal distribution. It is defined by it\'s mean, \\(\\mu\\), and it\'s variance, \\(\\sigma^2\\).','For the usage of newline equations, use this: $$\\sigma^2.$$', sep =
+              "<br/>"
+          )
+        )
+      },
+      'Uniform distribution' = {
+        HTML(
+          paste(
+            'The drawn distribution is the normal distribution. It is defined by it\'s mean, \\(\\mu\\), and it\'s variance, \\(\\sigma^2\\).','For the usage of newline equations, use this: $$\\sigma^2.$$', sep =
+              "<br/>"
+          )
+        )
+      }
+    )
   })
   
   ##############################################################################
@@ -301,13 +583,87 @@ shinyServer(function(input, output) {
   ##############################################################################
   
   output$hypothesis.p <- renderUI({
-    list(numericInput("hypothesis.p.value", "p value", 0.05, min = 0, max = 1),
-         checkboxInput("draw.hypothesis.p.value", "Use the p value", FALSE)
-         )
+    list(
+      numericInput(
+        "hypothesis.p.value", "p value", 0.05, min = 0, max = 1, step = 0.01
+      ),
+      checkboxInput("draw.hypothesis.p.value", "Use the p value", FALSE)
+    )
   })
-  output$hypothesis.crit <- renderUI({list(
-    numericInput("hypothesis.crit.value", "Critical Value", 1.96, step = 0.01),
-    checkboxInput("draw.hypothesis.p.value", "Use the critical value", FALSE)
-  )
+  
+  output$hypothesis.crit.to.p <- eventReactive(input$get.P.value, {
+    switch(
+      input$dist,
+      'Normal distribution' = {
+        paste(
+          'The corresponding onesided p value is:', pnorm(
+            input$hypothesis.crit.value, mean = input$mu, sd = input$sigma
+          )
+        )
+      },
+      'Log-normal distribution' = {
+        paste(
+          'The corresponding onesided p value is:', pnorm(
+            input$hypothesis.crit.value, mean = input$mu, sd = input$sigma
+          )
+        )
+      },
+      'Exponential distribution' = {
+        paste(
+          'The corresponding onesided p value is:', pnorm(
+            input$hypothesis.crit.value, mean = input$mu, sd = input$sigma
+          )
+        )
+      },
+      'Beta distribution' = {
+        paste(
+          'The corresponding onesided p value is:', pnorm(
+            input$hypothesis.crit.value, mean = input$mu, sd = input$sigma
+          )
+        )
+      },
+      'Binomial distribution' = {
+        paste(
+          'The corresponding onesided p value is:', pnorm(
+            input$hypothesis.crit.value, mean = input$mu, sd = input$sigma
+          )
+        )
+      },
+      'Chi-Square' = {
+        paste(
+          'The corresponding onesided p value is:', pnorm(
+            input$hypothesis.crit.value, mean = input$mu, sd = input$sigma
+          )
+        )
+      },
+      'Poisson distribution' = {
+        paste(
+          'The corresponding onesided p value is:', pnorm(
+            input$hypothesis.crit.value, mean = input$mu, sd = input$sigma
+          )
+        )
+      },
+      't-distribution' = {
+        paste(
+          'The corresponding onesided p value is:', pnorm(
+            input$hypothesis.crit.value, mean = input$mu, sd = input$sigma
+          )
+        )
+      },
+      'F-distribution' = {
+        paste(
+          'The corresponding onesided p value is:', pnorm(
+            input$hypothesis.crit.value, mean = input$mu, sd = input$sigma
+          )
+        )
+      },
+      'Uniform distribution' = {
+        paste(
+          'The corresponding onesided p value is:', pnorm(
+            input$hypothesis.crit.value, mean = input$mu, sd = input$sigma
+          )
+        )
+      }
+    )
   })
 })

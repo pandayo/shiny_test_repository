@@ -1,0 +1,20 @@
+h2{
+	background-color: #063D79;
+	background-image: url("unilogo.png");
+	background-repeat: no-repeat;
+	background-size: contain;
+	min-wdith: 768px;
+	align: center;
+	text-align: center;
+	color: white;
+	vertical-align: middle;
+}
+
+.col-sm-12{
+	background-color: #063D79;
+}
+
+.tabbable{
+	margin: 10px;
+	min-height: 380px;
+}
