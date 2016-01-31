@@ -17,6 +17,6 @@ Still to do:
 3. **Default smoothing**
 4. Maybe multiple functions in one picture
 5. md/text + shiny in one
-6. Help text
+6. Help text -> Placeholder in place
 7. **Dropdown: stuff: line/smooth, points, bars**
-8. Hypothesis-tests
+8. Hypothesis-tests -> Buggy placeholder in place
