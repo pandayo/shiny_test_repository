@@ -38,7 +38,9 @@ shinyUI(
           "Hypothesis testing",
           checkboxInput("draw.Plot.Hypothesis",
                         "Show hypothesistesting", value = FALSE),
-          uiOutput('hypothesis.p'),
+          numericInput(
+            "hypothesis.p.value", "p value", 0.05, min = 0, max = 1, step = 0.01
+          ),
           selectInput(
             'test.type','Select the type of test',
             c('Two-Sided', 'Left-Sided', 'Right-Sided')

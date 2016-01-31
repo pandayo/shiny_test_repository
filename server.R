@@ -38,7 +38,13 @@ allowed.Ranges <- function(input) {
   ))
 }
 
-
+limitRange <- function(fun, min, max, ...) {
+  function(x) {
+    y <- fun(x, ...)
+    y[x < min | x > max] <- NA
+    return(y)
+  }
+}
 
 hypothesis.plot <- function(input) {
   if (is.null(input$draw.range)) {
@@ -52,29 +58,30 @@ hypothesis.plot <- function(input) {
       return(switch(
         input$dist,
         'Normal distribution' = {
+          border <- c(
+            qnorm(
+              (input$hypothesis.p.value / 2), mean = input$mu, sd = input$sigma
+            ),qnorm(
+              1 -
+                (input$hypothesis.p.value / 2), mean = input$mu, sd = input$sigma
+            )
+          )
           sf <- c();
-          sf <- cbind(sf, geom_area(
-            data =
-              subset(
-                data.plot, x <= qnorm(
-                  (input$hypothesis.p.value / 2), mean = input$mu, sd = input$sigma
-                )
+          sf <-
+            cbind(
+              sf, stat_function(
+                fun = limitRange(
+                  dnorm, min = outputrange[1], max = border[1], mean = input$mu,
+                  sd = input$sigma
+                ), geom = 'area', fill = 'blue', alpha = '0.2'
               ),
-            aes(x,dnorm(
-              x,mean = input$mu,sd = input$sigma
-            )), fill = 'blue', alpha = 0.5
-          ));
-          sf <- cbind(sf, geom_area(
-            data =
-              subset(
-                data.plot, x >= qnorm(
-                  1-(input$hypothesis.p.value / 2), mean = input$mu, sd = input$sigma
-                )
-              ),
-            aes(x,dnorm(
-              x,mean = input$mu,sd = input$sigma
-            )), fill = 'blue', alpha = 0.5
-          ));
+              stat_function(
+                fun = limitRange(
+                  dnorm, max = outputrange[2], min = border[2], mean = input$mu,
+                  sd = input$sigma
+                ), geom = 'area', fill = 'blue', alpha = '0.2'
+              )
+            );
         },
         'Log-normal distribution' = {
           c(-1,100,0,5)
@@ -106,22 +113,10 @@ hypothesis.plot <- function(input) {
       ))
     },
     'Left-Sided' = {
-      border <-
-        qnorm(input$hypothesis.p.value, mean = input$mu, sd = input$sigma);
       return(switch(
         input$dist,
         'Normal distribution' = {
-          sf <- geom_area(
-            data =
-              subset(
-                data.plot, x < qnorm(
-                  input$hypothesis.p.value,mean = input$mu, sd = input$sigma
-                )
-              ),
-            aes(x,dnorm(
-              x,mean = input$mu,sd = input$sigma
-            )), fill = 'blue', alpha = 0.5
-          );
+          c(-1,100,0,5)
         },
         'Log-normal distribution' = {
           c(-1,100,0,5)
@@ -154,22 +149,10 @@ hypothesis.plot <- function(input) {
       
     },
     'Right-Sided' = {
-      border <-
-        qnorm(1 - input$hypothesis.p.value, mean = input$mu, sd = input$sigma);
       return(switch(
         input$dist,
         'Normal distribution' = {
-          sf <- geom_area(
-            data =
-              subset(
-                data.plot, x > qnorm(
-                  1-input$hypothesis.p.value,mean = input$mu, sd = input$sigma
-                )
-              ),
-            aes(x,dnorm(
-              x,mean = input$mu,sd = input$sigma
-            )), fill = 'blue', alpha = 0.5
-          );
+          c(-1,100,0,5)
         },
         'Log-normal distribution' = {
           c(-1,100,0,5)
@@ -581,15 +564,6 @@ shinyServer(function(input, output) {
   #                           Hypothesis Testing                               #
   #                                                                            #
   ##############################################################################
-  
-  output$hypothesis.p <- renderUI({
-    list(
-      numericInput(
-        "hypothesis.p.value", "p value", 0.05, min = 0, max = 1, step = 0.01
-      ),
-      checkboxInput("draw.hypothesis.p.value", "Use the p value", FALSE)
-    )
-  })
   
   output$hypothesis.crit.to.p <- eventReactive(input$get.P.value, {
     switch(
