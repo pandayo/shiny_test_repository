@@ -1,192 +1,16 @@
 library(shiny)
 library(ggplot2)
 
-# Define the ranges, the different distributions are allowed to use
-allowed.Ranges <- function(input) {
-  return(switch(
-    input$dist,
-    'Normal distribution' = {
-      c(-50,50,-5,5)
-    },
-    'Log-normal distribution' = {
-      c(-1,100,0,5)
-    },
-    'Exponential distribution' = {
-      c(-1,100,0,5)
-    },
-    'Beta distribution' = {
-      c(-50,50,-5,5)
-    },
-    'Binomial distribution' = {
-      c(0,100,0,input$size)
-    },
-    'Chi-Square' = {
-      c(0,100,0,5)
-    },
-    'Poisson distribution' = {
-      c(0,100,0,5)
-    },
-    't-distribution' = {
-      c(-50,50,-5,5)
-    },
-    'F-distribution' = {
-      c(0,50,0,5)
-    },
-    'Uniform distribution' = {
-      c(-50,50,-5,5)
-    }
-  ))
-}
+if (!exists("allowed.Ranges", mode = "function"))
+  source("static.R")
 
-limitRange <- function(fun, min, max, ...) {
-  function(x) {
-    y <- fun(x, ...)
-    y[x < min | x > max] <- NA
-    return(y)
-  }
-}
+##############################################################################
+#                                                                            #
+#                             Default Values                                 #
+#                                                                            #
+##############################################################################
 
-hypothesis.plot <- function(input) {
-  if (is.null(input$draw.range)) {
-    outputrange <- allowed.Ranges(input)[3:4];
-  }else{
-    outputrange <- input$draw.range;
-  }
-  switch(
-    input$test.type,
-    'Two-Sided' = {
-      return(switch(
-        input$dist,
-        'Normal distribution' = {
-          border <- c(
-            qnorm(
-              (input$hypothesis.p.value / 2), mean = input$mu, sd = input$sigma
-            ),qnorm(
-              1 -
-                (input$hypothesis.p.value / 2), mean = input$mu, sd = input$sigma
-            )
-          )
-          sf <- c();
-          sf <-
-            cbind(
-              sf, stat_function(
-                fun = limitRange(
-                  dnorm, min = outputrange[1], max = border[1], mean = input$mu,
-                  sd = input$sigma
-                ), geom = 'area', fill = 'blue', alpha = '0.2'
-              ),
-              stat_function(
-                fun = limitRange(
-                  dnorm, max = outputrange[2], min = border[2], mean = input$mu,
-                  sd = input$sigma
-                ), geom = 'area', fill = 'blue', alpha = '0.2'
-              )
-            );
-        },
-        'Log-normal distribution' = {
-          c(-1,100,0,5)
-        },
-        'Exponential distribution' = {
-          c(-1,100,0,5)
-        },
-        'Beta distribution' = {
-          c(-50,50,-5,5)
-        },
-        'Binomial distribution' = {
-          c(0,100,0,input$size)
-        },
-        'Chi-Square' = {
-          c(0,100,0,5)
-        },
-        'Poisson distribution' = {
-          c(0,100,0,5)
-        },
-        't-distribution' = {
-          c(-50,50,-5,5)
-        },
-        'F-distribution' = {
-          c(0,50,0,5)
-        },
-        'Uniform distribution' = {
-          c(-50,50,-5,5)
-        }
-      ))
-    },
-    'Left-Sided' = {
-      return(switch(
-        input$dist,
-        'Normal distribution' = {
-          c(-1,100,0,5)
-        },
-        'Log-normal distribution' = {
-          c(-1,100,0,5)
-        },
-        'Exponential distribution' = {
-          c(-1,100,0,5)
-        },
-        'Beta distribution' = {
-          c(-50,50,-5,5)
-        },
-        'Binomial distribution' = {
-          c(0,100,0,input$size)
-        },
-        'Chi-Square' = {
-          c(0,100,0,5)
-        },
-        'Poisson distribution' = {
-          c(0,100,0,5)
-        },
-        't-distribution' = {
-          c(-50,50,-5,5)
-        },
-        'F-distribution' = {
-          c(0,50,0,5)
-        },
-        'Uniform distribution' = {
-          c(-50,50,-5,5)
-        }
-      ))
-      
-    },
-    'Right-Sided' = {
-      return(switch(
-        input$dist,
-        'Normal distribution' = {
-          c(-1,100,0,5)
-        },
-        'Log-normal distribution' = {
-          c(-1,100,0,5)
-        },
-        'Exponential distribution' = {
-          c(-1,100,0,5)
-        },
-        'Beta distribution' = {
-          c(-50,50,-5,5)
-        },
-        'Binomial distribution' = {
-          c(0,100,0,input$size)
-        },
-        'Chi-Square' = {
-          c(0,100,0,5)
-        },
-        'Poisson distribution' = {
-          c(0,100,0,5)
-        },
-        't-distribution' = {
-          c(-50,50,-5,5)
-        },
-        'F-distribution' = {
-          c(0,50,0,5)
-        },
-        'Uniform distribution' = {
-          c(-50,50,-5,5)
-        }
-      ))
-    }
-  );
-  return(sf);
-}
-
+smoothing.points <- 1001;
 
 ##############################################################################
 #                                                                            #
@@ -321,9 +145,9 @@ shinyServer(function(input, output) {
     selectInput('geom','Stuff', c('line','point','bar'))
   })
   
-  output$option.sp <- renderUI({
+  output$option.smoothing.points <- renderUI({
     if (input$dist != 'Binomial distribution')
-      numericInput('n','Smoothing points',101)
+      numericInput('n','Smoothing points',smoothing.points)
   })
   
   ##############################################################################
@@ -333,7 +157,14 @@ shinyServer(function(input, output) {
   ##############################################################################
   
   output$dist.Plot <- renderPlot({
-    nplot()
+    if (input$draw.Plot) {
+      op <- nplot();
+    }else{
+      op <-
+        ggplot(data.frame(x = seq(-5,5,10 / smoothing.points)), aes(x)) + 
+                    stat_function(fun = dnorm,geom = "line");
+    }
+    return(op);
   })
   
   # Plotting the distributions
@@ -349,7 +180,7 @@ shinyServer(function(input, output) {
       geom <- input$geom;
     }
     if (is.null(input$n)) {
-      n <- ceiling(abs(outputrange[2] - outputrange[1]) * 10);
+      n <- smoothing.points;
     }else{
       n <- input$n;
     }
@@ -638,6 +469,26 @@ shinyServer(function(input, output) {
           )
         )
       }
+    )
+  })
+  
+  ##############################################################################
+  #                                                                            #
+  #                             Helptext Output                                #
+  #                                                                            #
+  ##############################################################################
+  
+  output$help.line <- renderUI({
+    tags$div(class = 'bottom', checked = NA, 
+      list(
+        tags$div(
+          class = 'shiny-text-output', checked = NA, paste(
+          "This is your help text, it will change depending on the distribution you selected. At the moment, you selected the",input$dist,"."
+        )),
+        tags$div(
+          class = 'shiny-text-output', checked = NA, 'dist.text(input$dist)'
+        )
+      )
     )
   })
 })
