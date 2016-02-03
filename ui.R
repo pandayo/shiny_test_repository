@@ -26,7 +26,8 @@ shinyUI(
               )
             )
           ),
-          fluidRow(uiOutput('dist.options'))
+          uiOutput('dist.options'),
+          uiOutput('option.range')
         ),
         tabPanel(
           "Hypothesis testing",
@@ -41,7 +42,6 @@ shinyUI(
         ),
         tabPanel("Options",
                  fluidRow(
-                   uiOutput('option.range'),
                    uiOutput('option.geom'),
                    uiOutput('option.smoothing.points')
                  ))

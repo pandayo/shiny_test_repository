@@ -29,3 +29,8 @@ h2{
 	padding-left: 15px;
 	padding-right: 15px;
 }
+
+body{
+	min-width:1024px;
+	min-height: 768px;
+}
