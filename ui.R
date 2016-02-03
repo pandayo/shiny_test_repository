@@ -34,14 +34,10 @@ shinyUI(
             'test.type','Select the type of test',
             c('Two-Sided', 'Left-Sided', 'Right-Sided')
           ),
-          checkboxInput("draw.Plot.Hypothesis",
-                        "Show hypothesistesting", value = FALSE),
           numericInput(
-            "hypothesis.p.value", "p value", 0.05, min = 0, max = 1, step = 0.01
+            "hypothesis.p.value", "p value", NA, min = 0, max = 1, step = 0.01
           ),
-          numericInput("hypothesis.crit.value", "Critical Value", 1.96, step = 0.01),
-          actionButton("get.P.value","Calculate p value"),
-          verbatimTextOutput('hypothesis.crit.to.p')
+          numericInput("hypothesis.crit.value", "Critical Value", NA, step = 0.01)
         ),
         tabPanel("Options",
                  fluidRow(

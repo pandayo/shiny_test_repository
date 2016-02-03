@@ -11,6 +11,8 @@ if (!exists("allowed.Ranges", mode = "function"))
 ##############################################################################
 
 smoothing.points <- 1001;
+server.dist <- 'Normal distribution'
+server.draw.ranges <- c(0,0,0,0)
 
 ##############################################################################
 #                                                                            #
@@ -141,6 +143,7 @@ shinyServer(function(input, output) {
     return(sI);
   })
   
+  
   output$option.geom <- renderUI({
     selectInput('geom','Stuff', c('line','point','bar'))
   })
@@ -169,10 +172,10 @@ shinyServer(function(input, output) {
   
   # Plotting the distributions
   nplot <- eventReactive(input$draw.Plot, {
-    if (is.null(input$draw.range)) {
+    if (is.null(input$draw.ranges)) {
       outputrange <- allowed.Ranges(input)[3:4];
     }else{
-      outputrange <- input$draw.range;
+      outputrange <- input$draw.ranges;
     }
     if (is.null(input$geom)) {
       geom <- "line"
@@ -283,13 +286,13 @@ shinyServer(function(input, output) {
         )
       }
     );
-    if (input$draw.Plot.Hypothesis) {
-      # More of that ugly work around
-      if (is.array(y <- hypothesis.plot(input))) {
-        outplot <- outplot + y;
-      }else{
-        outplot <- outplot + y;
-      }
+    if (!is.na(input$hypothesis.crit.value)) {
+      y <- hypothesis.crit.plot(input);
+      outplot <- outplot + y;
+    }
+    if (!is.na(input$hypothesis.p.value)){
+      y <- hypothesis.plot(input);
+      outplot <- outplot + y;
     }
     return(outplot)
   })
@@ -384,88 +387,6 @@ shinyServer(function(input, output) {
           paste(
             'The drawn distribution is the normal distribution. It is defined by it\'s mean, \\(\\mu\\), and it\'s variance, \\(\\sigma^2\\).','For the usage of newline equations, use this: $$\\sigma^2.$$', sep =
               "<br/>"
-          )
-        )
-      }
-    )
-  })
-  
-  ##############################################################################
-  #                                                                            #
-  #                           Hypothesis Testing                               #
-  #                                                                            #
-  ##############################################################################
-  
-  output$hypothesis.crit.to.p <- eventReactive(input$get.P.value, {
-    switch(
-      input$dist,
-      'Normal distribution' = {
-        paste(
-          'The corresponding onesided p value is:', pnorm(
-            input$hypothesis.crit.value, mean = input$mu, sd = input$sigma
-          )
-        )
-      },
-      'Log-normal distribution' = {
-        paste(
-          'The corresponding onesided p value is:', pnorm(
-            input$hypothesis.crit.value, mean = input$mu, sd = input$sigma
-          )
-        )
-      },
-      'Exponential distribution' = {
-        paste(
-          'The corresponding onesided p value is:', pnorm(
-            input$hypothesis.crit.value, mean = input$mu, sd = input$sigma
-          )
-        )
-      },
-      'Beta distribution' = {
-        paste(
-          'The corresponding onesided p value is:', pnorm(
-            input$hypothesis.crit.value, mean = input$mu, sd = input$sigma
-          )
-        )
-      },
-      'Binomial distribution' = {
-        paste(
-          'The corresponding onesided p value is:', pnorm(
-            input$hypothesis.crit.value, mean = input$mu, sd = input$sigma
-          )
-        )
-      },
-      'Chi-Square' = {
-        paste(
-          'The corresponding onesided p value is:', pnorm(
-            input$hypothesis.crit.value, mean = input$mu, sd = input$sigma
-          )
-        )
-      },
-      'Poisson distribution' = {
-        paste(
-          'The corresponding onesided p value is:', pnorm(
-            input$hypothesis.crit.value, mean = input$mu, sd = input$sigma
-          )
-        )
-      },
-      't-distribution' = {
-        paste(
-          'The corresponding onesided p value is:', pnorm(
-            input$hypothesis.crit.value, mean = input$mu, sd = input$sigma
-          )
-        )
-      },
-      'F-distribution' = {
-        paste(
-          'The corresponding onesided p value is:', pnorm(
-            input$hypothesis.crit.value, mean = input$mu, sd = input$sigma
-          )
-        )
-      },
-      'Uniform distribution' = {
-        paste(
-          'The corresponding onesided p value is:', pnorm(
-            input$hypothesis.crit.value, mean = input$mu, sd = input$sigma
           )
         )
       }
