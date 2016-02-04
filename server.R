@@ -6,16 +6,6 @@ if (!exists("allowed.Ranges", mode = "function"))
 
 ##############################################################################
 #                                                                            #
-#                             Default Values                                 #
-#                                                                            #
-##############################################################################
-
-smoothing.points <- 1001;
-server.dist <- 'Normal distribution'
-server.draw.ranges <- c(0,0,0,0)
-
-##############################################################################
-#                                                                            #
 #                               Shiny Server                                 #
 #                                                                            #
 ##############################################################################
@@ -164,10 +154,26 @@ shinyServer(function(input, output) {
       op <- nplot();
     }else{
       op <-
-        ggplot(data.frame(x = seq(-5,5,10 / smoothing.points)), aes(x)) + 
-                    stat_function(fun = dnorm,geom = "line");
+        ggplot(data.frame(x = seq(-5,5,10 / smoothing.points)), aes(x)) +
+        stat_function(fun = dnorm,geom = "line");
+    }
+    if (input$add.level) {
+      op <- op + pplot();
     }
     return(op);
+  })
+  
+  pplot <- eventReactive(input$add.level, {
+    return(hypothesis.plot(input));
+  })
+  
+  output$crit.value <- renderText({
+    if(!is.na(input$hypothesis.p.value)){
+      return(paste("To a level of significance of", input$hypothesis.p.value,
+                 "the corresponding critical value is", crit.value.calculator(input)))
+    }else{
+      return("No level of significance given.")
+    }
   })
   
   # Plotting the distributions
@@ -286,14 +292,6 @@ shinyServer(function(input, output) {
         )
       }
     );
-    if (!is.na(input$hypothesis.crit.value)) {
-      y <- hypothesis.crit.plot(input);
-      outplot <- outplot + y;
-    }
-    if (!is.na(input$hypothesis.p.value)){
-      y <- hypothesis.plot(input);
-      outplot <- outplot + y;
-    }
     return(outplot)
   })
   
@@ -400,16 +398,17 @@ shinyServer(function(input, output) {
   ##############################################################################
   
   output$help.line <- renderUI({
-    tags$div(class = 'bottom', checked = NA, 
-      list(
-        tags$div(
-          class = 'shiny-text-output', checked = NA, paste(
-          "This is your help text, it will change depending on the distribution you selected. At the moment, you selected the",input$dist,"."
-        )),
-        tags$div(
-          class = 'shiny-text-output', checked = NA, 'dist.text(input$dist)'
-        )
-      )
-    )
+    tags$div(class = 'bottom', checked = NA,
+             list(
+               tags$div(
+                 class = 'shiny-text-output', checked = NA, paste(
+                   "This is your help text, it will change depending on the distribution you selected. At the moment, you selected the"
+                   ,input$dist,"."
+                 )
+               ),
+               tags$div(
+                 class = 'shiny-text-output', checked = NA, 'dist.text(input$dist)'
+               )
+             ))
   })
 })
