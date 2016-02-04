@@ -27,11 +27,11 @@ shinyUI(
             )
           ),
           uiOutput('dist.options'),
-          uiOutput('option.range'),
-          actionButton("draw.Plot","Draw distribution")
+          uiOutput('option.range')
         ),
         tabPanel(
           "Hypothesis testing",
+          checkboxInput('add.checkbox',label = 'Draw level of significance', value = F),
           selectInput(
             'test.type','Select the type of test',
             c('Two-Sided', 'Left-Sided', 'Right-Sided')
@@ -39,9 +39,8 @@ shinyUI(
           numericInput(
             "hypothesis.p.value", "level of significance", NA, min = 0, max = 1, step = 0.01
           ),
-          verbatimTextOutput("crit.value"),
+          verbatimTextOutput("crit.value")
           #numericInput("hypothesis.crit.value", "Critical Value", NA, step = 0.01),
-          actionButton('add.level','Draw in Plot')
         ),
         tabPanel("Options",
                  fluidRow(
@@ -49,7 +48,7 @@ shinyUI(
                    uiOutput('option.smoothing.points')
                  ))
       ),
-      fluidRow()
+      fluidRow(        actionButton("draw.Plot","Draw distribution"))
     ),
     mainPanel(width = 9,
               plotOutput('dist.Plot'),

@@ -6,6 +6,14 @@ if (!exists("allowed.Ranges", mode = "function"))
 
 ##############################################################################
 #                                                                            #
+#                             Default Values                                 #
+#                                                                            #
+##############################################################################
+
+smoothing.points <- 1001;
+
+##############################################################################
+#                                                                            #
 #                               Shiny Server                                 #
 #                                                                            #
 ##############################################################################
@@ -157,14 +165,10 @@ shinyServer(function(input, output) {
         ggplot(data.frame(x = seq(-5,5,10 / smoothing.points)), aes(x)) +
         stat_function(fun = dnorm,geom = "line");
     }
-    if (input$add.level) {
-      op <- op + pplot();
+    if (input$add.checkbox) {
+      op <- op + hypothesis.plot(input,smoothing.points);
     }
     return(op);
-  })
-  
-  pplot <- eventReactive(input$add.level, {
-    return(hypothesis.plot(input));
   })
   
   output$crit.value <- renderText({

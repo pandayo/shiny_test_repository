@@ -16,7 +16,7 @@ h2{
 
 .tabbable{
 	margin: 10px;
-	min-height: 380px;
+	min-height: 550px;
 }
 
 .bottom{
@@ -24,7 +24,7 @@ h2{
 	left: 15px;
 	bottom: 0;
 	right: 15px;
-	min-width: 768px;
+	min-width: 1024px;
 	border: 1px solid #063D79;
 	padding-left: 15px;
 	padding-right: 15px;
