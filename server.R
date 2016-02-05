@@ -72,7 +72,7 @@ shinyServer(function(input, output) {
             inputId = 'size',label = 'Numbers of trials', value = 10
           ),
           numericInput(
-            inputId = 'prob',label = 'p', value = 0.5
+            inputId = 'prob',label = 'p', value = 0.5, min = 0, max = 1
           )
         )
       },
@@ -165,15 +165,12 @@ shinyServer(function(input, output) {
         ggplot(data.frame(x = seq(-5,5,10 / smoothing.points)), aes(x)) +
         stat_function(fun = dnorm,geom = "line");
     }
-    if (input$add.checkbox) {
-      op <- op + hypothesis.plot(input,smoothing.points);
-    }
     return(op);
   })
   
   output$crit.value <- renderText({
-    if(!is.na(input$hypothesis.p.value)){
-      return(paste("To a level of significance of", input$hypothesis.p.value,
+    if(!is.na(input$hypothesis.los.value)){
+      return(paste("To a level of significance of", input$hypothesis.los.value,
                  "the corresponding critical value is", crit.value.calculator(input)))
     }else{
       return("No level of significance given.")
@@ -182,10 +179,10 @@ shinyServer(function(input, output) {
   
   # Plotting the distributions
   nplot <- eventReactive(input$draw.Plot, {
-    if (is.null(input$draw.ranges)) {
+    if (is.null(input$draw.range)) {
       outputrange <- allowed.Ranges(input)[3:4];
     }else{
-      outputrange <- input$draw.ranges;
+      outputrange <- input$draw.range;
     }
     if (is.null(input$geom)) {
       geom <- "line"
@@ -296,6 +293,9 @@ shinyServer(function(input, output) {
         )
       }
     );
+    if (input$add.checkbox) {
+      outplot <- outplot + hypothesis.plot(input,n);
+    }
     return(outplot)
   })
   

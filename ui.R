@@ -37,7 +37,7 @@ shinyUI(
             c('Two-Sided', 'Left-Sided', 'Right-Sided')
           ),
           numericInput(
-            "hypothesis.p.value", "level of significance", NA, min = 0, max = 1, step = 0.01
+            "hypothesis.los.value", "level of significance", NA, min = 0, max = 1, step = 0.01
           ),
           verbatimTextOutput("crit.value")
           #numericInput("hypothesis.crit.value", "Critical Value", NA, step = 0.01),
@@ -55,7 +55,8 @@ shinyUI(
               br(),
               if (!is.null('dist.Plot')) {
                 uiOutput('dist.Info')
-              }),
-    br(),
-    htmlOutput('help.line'))
+              })#,
+    #br(),
+    #htmlOutput('help.line')
+    )
   )

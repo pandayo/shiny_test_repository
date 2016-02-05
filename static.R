@@ -44,11 +44,7 @@ limitRange <- function(fun, min, max, ...) {
 }
 
 hypothesis.plot <- function(input,smoothing.points) {
-  if (is.null(input$n)) {
-    n <- smoothing.points;
-  }else{
-    n <- input$n;
-  }
+  n <- smoothing.points;
   if (is.null(input$draw.range)) {
     outputrange <- allowed.Ranges(input)[3:4];
   }else{
@@ -62,10 +58,10 @@ hypothesis.plot <- function(input,smoothing.points) {
         'Normal distribution' = {
           border <- c(
             qnorm(
-              (input$hypothesis.p.value / 2), mean = input$mu, sd = input$sigma
+              (input$hypothesis.los.value / 2), mean = input$mu, sd = input$sigma
             ),qnorm(
               1 -
-                (input$hypothesis.p.value / 2), mean = input$mu, sd = input$sigma
+                (input$hypothesis.los.value / 2), mean = input$mu, sd = input$sigma
             )
           )
           sf <- c();
@@ -88,10 +84,10 @@ hypothesis.plot <- function(input,smoothing.points) {
         'Log-normal distribution' = {
           border <- c(
             qlnorm(
-              (input$hypothesis.p.value / 2), meanlog = input$mu, sdlog = input$sigma
+              (input$hypothesis.los.value / 2), meanlog = input$mu, sdlog = input$sigma
             ),qlnorm(
               1 -
-                (input$hypothesis.p.value / 2), meanlog = input$mu, sdlog = input$sigma
+                (input$hypothesis.los.value / 2), meanlog = input$mu, sdlog = input$sigma
             )
           )
           sf <- c();
@@ -113,8 +109,8 @@ hypothesis.plot <- function(input,smoothing.points) {
         },
         'Exponential distribution' = {
           border <-
-            c(qexp((input$hypothesis.p.value / 2), rate = input$rate),
-              qexp(1 - (input$hypothesis.p.value / 2), rate = input$rate))
+            c(qexp((input$hypothesis.los.value / 2), rate = input$rate),
+              qexp(1 - (input$hypothesis.los.value / 2), rate = input$rate))
           sf <- c();
           sf <-
             cbind(
@@ -133,10 +129,10 @@ hypothesis.plot <- function(input,smoothing.points) {
         'Beta distribution' = {
           border <-
             c(
-              qbeta((input$hypothesis.p.value / 2), shape1 = input$shape1, shape2 = input$shape2
+              qbeta((input$hypothesis.los.value / 2), shape1 = input$shape1, shape2 = input$shape2
               ),
               qbeta(
-                1 - (input$hypothesis.p.value / 2), shape1 = input$shape1, shape2 = input$shape2
+                1 - (input$hypothesis.los.value / 2), shape1 = input$shape1, shape2 = input$shape2
               )
             )
           sf <- c();
@@ -157,10 +153,10 @@ hypothesis.plot <- function(input,smoothing.points) {
         'Binomial distribution' = {
           border <-
             c(
-              qbinom((input$hypothesis.p.value / 2), size = input$size, prob = input$prob
+              qbinom((input$hypothesis.los.value / 2), size = input$size, prob = input$prob
               ),
               qbinom(
-                1 - (input$hypothesis.p.value / 2), size = input$size, prob = input$prob
+                1 - (input$hypothesis.los.value / 2), size = input$size, prob = input$prob
               )
             )
           sf <- c();
@@ -179,8 +175,8 @@ hypothesis.plot <- function(input,smoothing.points) {
             );
         },
         'Chi-Square' = {
-          border <- c(qchisq((input$hypothesis.p.value / 2), df = input$df),
-                      qchisq(1 - (input$hypothesis.p.value / 2), df = input$df))
+          border <- c(qchisq((input$hypothesis.los.value / 2), df = input$df),
+                      qchisq(1 - (input$hypothesis.los.value / 2), df = input$df))
           sf <- c();
           sf <-
             cbind(
@@ -197,8 +193,8 @@ hypothesis.plot <- function(input,smoothing.points) {
             );
         },
         'Poisson distribution' = {
-          border <- c(qpois((input$hypothesis.p.value / 2), lambda = input$lambda),
-                      qpois(1 - (input$hypothesis.p.value / 2), lambda = input$lambda))
+          border <- c(qpois((input$hypothesis.los.value / 2), lambda = input$lambda),
+                      qpois(1 - (input$hypothesis.los.value / 2), lambda = input$lambda))
           sf <- c();
           sf <-
             cbind(
@@ -215,8 +211,8 @@ hypothesis.plot <- function(input,smoothing.points) {
             );
         },
         't-distribution' = {
-          border <- c(qt((input$hypothesis.p.value / 2), df = input$df), 
-                      qt(1 - (input$hypothesis.p.value / 2), df = input$df))
+          border <- c(qt((input$hypothesis.los.value / 2), df = input$df), 
+                      qt(1 - (input$hypothesis.los.value / 2), df = input$df))
           sf <- c();
           sf <-
             cbind(
@@ -233,11 +229,11 @@ hypothesis.plot <- function(input,smoothing.points) {
             );
         },
         'F-distribution' = {
-          border <- c(qf((input$hypothesis.p.value / 2), df1 = input$df1, df2 = input$df2
+          border <- c(qf((input$hypothesis.los.value / 2), df1 = input$df1, df2 = input$df2
           ),
           qf(
             1 -
-              (input$hypothesis.p.value / 2), df1 = input$df1, df2 = input$df2
+              (input$hypothesis.los.value / 2), df1 = input$df1, df2 = input$df2
           ))
           sf <- c();
           sf <-
@@ -258,12 +254,12 @@ hypothesis.plot <- function(input,smoothing.points) {
         },
         'Uniform distribution' = {
           border <- c(
-            qunif((input$hypothesis.p.value / 2), min = input$dist.range[1],
+            qunif((input$hypothesis.los.value / 2), min = input$dist.range[1],
                   max = input$dist.range[2]
             ),
             qunif(
               1 -
-                (input$hypothesis.p.value / 2), min = input$dist.range[1],
+                (input$hypothesis.los.value / 2), min = input$dist.range[1],
               max = input$dist.range[2]
             )
           )
@@ -291,7 +287,7 @@ hypothesis.plot <- function(input,smoothing.points) {
         input$dist,
         'Normal distribution' = {
           border <-
-            qnorm(input$hypothesis.p.value, mean = input$mu, sd = input$sigma);
+            qnorm(input$hypothesis.los.value, mean = input$mu, sd = input$sigma);
           sf <- stat_function(
             fun = limitRange(
               dnorm, min = outputrange[1], max = border, mean = input$mu,
@@ -301,7 +297,7 @@ hypothesis.plot <- function(input,smoothing.points) {
         },
         'Log-normal distribution' = {
           border <-
-            qlnorm(input$hypothesis.p.value, meanlog = input$mu, sdlog = input$sigma);
+            qlnorm(input$hypothesis.los.value, meanlog = input$mu, sdlog = input$sigma);
           sf <- stat_function(
             fun = limitRange(
               dlnorm, min = outputrange[1], max = border, meanlog = input$mu,
@@ -311,7 +307,7 @@ hypothesis.plot <- function(input,smoothing.points) {
         },
         'Exponential distribution' = {
           border <-
-            qexp((input$hypothesis.p.value), rate = input$rate)
+            qexp((input$hypothesis.los.value), rate = input$rate)
           sf <-
             stat_function(
               fun = limitRange(
@@ -320,7 +316,7 @@ hypothesis.plot <- function(input,smoothing.points) {
             );
         },
         'Beta distribution' = {
-          border <- qbeta((input$hypothesis.p.value), shape1 = input$shape1,
+          border <- qbeta((input$hypothesis.los.value), shape1 = input$shape1,
                           shape2 = input$shape2
           )
           sf <- stat_function(
@@ -332,7 +328,7 @@ hypothesis.plot <- function(input,smoothing.points) {
         },
         'Binomial distribution' = {
           border <-
-            qbinom((input$hypothesis.p.value), size = input$size, prob = input$prob)
+            qbinom((input$hypothesis.los.value), size = input$size, prob = input$prob)
           sf <- stat_function(
             fun = limitRange(
               dbinom, min = outputrange[1], max = border, size = input$size, prob = input$prob
@@ -340,7 +336,7 @@ hypothesis.plot <- function(input,smoothing.points) {
           );
         },
         'Chi-Square' = {
-          border <- qchisq(input$hypothesis.p.value, df = input$df)
+          border <- qchisq(input$hypothesis.los.value, df = input$df)
           sf <- stat_function(
             fun = limitRange(
               dchisq, min = outputrange[1], max = border, df = input$df
@@ -348,7 +344,7 @@ hypothesis.plot <- function(input,smoothing.points) {
           );
         },
         'Poisson distribution' = {
-          border <- qpois(input$hypothesis.p.value, lambda = input$lambda)
+          border <- qpois(input$hypothesis.los.value, lambda = input$lambda)
           sf <- stat_function(
             fun = limitRange(
               dpois, min = outputrange[1],
@@ -358,7 +354,7 @@ hypothesis.plot <- function(input,smoothing.points) {
           );
         },
         't-distribution' = {
-          border <- qt(input$hypothesis.p.value, df = input$df)
+          border <- qt(input$hypothesis.los.value, df = input$df)
           sf <- stat_function(
             fun = limitRange(
               dt, min = outputrange[1],
@@ -368,7 +364,7 @@ hypothesis.plot <- function(input,smoothing.points) {
           );
         },
         'F-distribution' = {
-          border <- qf(input$hypothesis.p.value, df1 = input$df1,
+          border <- qf(input$hypothesis.los.value, df1 = input$df1,
                        df2 = input$df2)
           sf <- stat_function(
             fun = limitRange(
@@ -381,7 +377,7 @@ hypothesis.plot <- function(input,smoothing.points) {
         'Uniform distribution' = {
           border <-
             qunif(
-              input$hypothesis.p.value, min = input$dist.range[1],
+              input$hypothesis.los.value, min = input$dist.range[1],
               max = input$dist.range[2]
             )
           sf <- stat_function(
@@ -401,7 +397,7 @@ hypothesis.plot <- function(input,smoothing.points) {
         input$dist,
         'Normal distribution' = {
           border <-
-            qnorm(1 - input$hypothesis.p.value, mean = input$mu, sd = input$sigma);
+            qnorm(1 - input$hypothesis.los.value, mean = input$mu, sd = input$sigma);
           sf <- stat_function(
             fun = limitRange(
               dnorm, max = outputrange[2], min = border, mean = input$mu,
@@ -411,7 +407,7 @@ hypothesis.plot <- function(input,smoothing.points) {
         },
         'Log-normal distribution' = {
           border <-
-            qlnorm(1 - input$hypothesis.p.value, meanlog = input$mu, sdlog = input$sigma);
+            qlnorm(1 - input$hypothesis.los.value, meanlog = input$mu, sdlog = input$sigma);
           sf <- stat_function(
             fun = limitRange(
               dlnorm, max = outputrange[2], min = border, meanlog = input$mu,
@@ -421,7 +417,7 @@ hypothesis.plot <- function(input,smoothing.points) {
         },
         'Exponential distribution' = {
           border <-
-            qexp((1 - input$hypothesis.p.value), rate = input$rate)
+            qexp((1 - input$hypothesis.los.value), rate = input$rate)
           sf <-
             stat_function(
               fun = limitRange(
@@ -431,7 +427,7 @@ hypothesis.plot <- function(input,smoothing.points) {
         },
         'Beta distribution' = {
           border <-
-            qbeta((1 - input$hypothesis.p.value), shape1 = input$shape1,
+            qbeta((1 - input$hypothesis.los.value), shape1 = input$shape1,
                   shape2 = input$shape2
             )
           sf <- stat_function(
@@ -443,7 +439,7 @@ hypothesis.plot <- function(input,smoothing.points) {
         },
         'Binomial distribution' = {
           border <-
-            qbinom((1 - input$hypothesis.p.value), size = input$size, prob = input$prob)
+            qbinom((1 - input$hypothesis.los.value), size = input$size, prob = input$prob)
           sf <- stat_function(
             fun = limitRange(
               dbinom, max = outputrange[2], min = border, size = input$size, prob = input$prob
@@ -451,7 +447,7 @@ hypothesis.plot <- function(input,smoothing.points) {
           );
         },
         'Chi-Square' = {
-          border <- qchisq(1 - (input$hypothesis.p.value), df = input$df)
+          border <- qchisq(1 - (input$hypothesis.los.value), df = input$df)
           sf <- stat_function(
             fun = limitRange(
               dchisq, max = outputrange[2], min = border, df = input$df
@@ -460,7 +456,7 @@ hypothesis.plot <- function(input,smoothing.points) {
         },
         'Poisson distribution' = {
           border <-
-            qpois(1 - input$hypothesis.p.value, lambda = input$lambda)
+            qpois(1 - input$hypothesis.los.value, lambda = input$lambda)
           sf <-
             stat_function(
               fun = limitRange(
@@ -471,7 +467,7 @@ hypothesis.plot <- function(input,smoothing.points) {
             );
         },
         't-distribution' = {
-          border <- qt(1 - input$hypothesis.p.value, df = input$df)
+          border <- qt(1 - input$hypothesis.los.value, df = input$df)
           sf <-
             stat_function(
               fun = limitRange(
@@ -483,7 +479,7 @@ hypothesis.plot <- function(input,smoothing.points) {
             );
         },
         'F-distribution' = {
-          border <- qf(1 - input$hypothesis.p.value, df1 = input$df1,
+          border <- qf(1 - input$hypothesis.los.value, df1 = input$df1,
                        df2 = input$df2)
           sf <-
             stat_function(
@@ -498,7 +494,7 @@ hypothesis.plot <- function(input,smoothing.points) {
         },
         'Uniform distribution' = {
           border <- qunif(
-            1 - input$hypothesis.p.value,
+            1 - input$hypothesis.los.value,
             min = input$dist.range[1], max = input$dist.range[2]
           )
           sf <-
@@ -519,5 +515,49 @@ hypothesis.plot <- function(input,smoothing.points) {
 }
 
 crit.value.calculator <- function(input) {
-  return(" IS DIS ENUF OF A PLACEHOLDER?!")
+  switch(
+    input$dist,
+    'Normal distribution' = {
+      switch(
+        input$test.type,
+        'Two-Sided'={
+          output.text <- " IS DIS ENUF OF A PLACEHOLDER?!"
+        },
+        'Left Sided'={
+          output.text <- " IS DIS ENUF OF A PLACEHOLDER?!"
+        },
+        'Right Sided'={
+          output.text <- " IS DIS ENUF OF A PLACEHOLDER?!"
+        }
+      )
+    },
+    'Log-normal distribution' = {
+      output.text <- " IS DIS ENUF OF A PLACEHOLDER?!"
+    },
+    'Exponential distribution' = {
+      output.text <- " IS DIS ENUF OF A PLACEHOLDER?!"
+    },
+    'Beta distribution' = {
+      output.text <- " IS DIS ENUF OF A PLACEHOLDER?!"
+    },
+    'Binomial distribution' = {
+      output.text <- " IS DIS ENUF OF A PLACEHOLDER?!"
+    },
+    'Chi-Square' = {
+      output.text <- " IS DIS ENUF OF A PLACEHOLDER?!"
+    },
+    'Poisson distribution' = {
+      output.text <- " IS DIS ENUF OF A PLACEHOLDER?!"
+    },
+    't-distribution' = {
+      output.text <- " IS DIS ENUF OF A PLACEHOLDER?!"
+    },
+    'F-distribution' = {
+      output.text <- " IS DIS ENUF OF A PLACEHOLDER?!"
+    },
+    'Uniform distribution' = {
+      output.text <- " IS DIS ENUF OF A PLACEHOLDER?!"
+    }
+  )
+  return(output.text)
 }
