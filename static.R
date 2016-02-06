@@ -43,6 +43,26 @@ limitRange <- function(fun, min, max, ...) {
   }
 }
 
+border.norm <- function(alpha, mean, sd){
+  return(qnorm(
+      alpha, mean = mean, sd = sd
+    ))
+}
+
+border.lnorm <- function(alpha, meanlog, sdlog){
+  return(qlnorm(
+    alpha, meanlog = meanlog, sdlog = sdlog
+  ))
+}
+
+border.exp <- function(alpha, rate){
+  return(qexp(alpha, rate = rate))
+}
+
+border.beta <- function(alpha, shape1, shape2){
+  return(qbeta(alpha, shape1 = shape1, shape2 = shape2))
+}
+
 hypothesis.plot <- function(input,smoothing.points) {
   n <- smoothing.points;
   if (is.null(input$draw.range)) {
@@ -56,14 +76,8 @@ hypothesis.plot <- function(input,smoothing.points) {
       return(switch(
         input$dist,
         'Normal distribution' = {
-          border <- c(
-            qnorm(
-              (input$hypothesis.los.value / 2), mean = input$mu, sd = input$sigma
-            ),qnorm(
-              1 -
-                (input$hypothesis.los.value / 2), mean = input$mu, sd = input$sigma
-            )
-          )
+          border <- c(border.norm(input$hypothesis.los.value/2, input$mu, input$sigma),
+                      border.norm(1-input$hypothesis.los.value/2, input$mu, input$sigma));
           sf <- c();
           sf <-
             cbind(
@@ -82,14 +96,8 @@ hypothesis.plot <- function(input,smoothing.points) {
             );
         },
         'Log-normal distribution' = {
-          border <- c(
-            qlnorm(
-              (input$hypothesis.los.value / 2), meanlog = input$mu, sdlog = input$sigma
-            ),qlnorm(
-              1 -
-                (input$hypothesis.los.value / 2), meanlog = input$mu, sdlog = input$sigma
-            )
-          )
+          border <- c(border.lnorm(input$hypothesis.los.value/2, input$mu, input$sigma),
+                      border.lnorm(1-input$hypothesis.los.value/2, input$mu, input$sigma));
           sf <- c();
           sf <-
             cbind(
@@ -109,8 +117,8 @@ hypothesis.plot <- function(input,smoothing.points) {
         },
         'Exponential distribution' = {
           border <-
-            c(qexp((input$hypothesis.los.value / 2), rate = input$rate),
-              qexp(1 - (input$hypothesis.los.value / 2), rate = input$rate))
+            c(border.exp(input$hypothesis.los.value/2, input$rate),
+              border.exp(1-input$hypothesis.los.value/2, inputrate))
           sf <- c();
           sf <-
             cbind(
@@ -128,10 +136,9 @@ hypothesis.plot <- function(input,smoothing.points) {
         },
         'Beta distribution' = {
           border <-
-            c(
-              qbeta((input$hypothesis.los.value / 2), shape1 = input$shape1, shape2 = input$shape2
+            c(border.beta((input$hypothesis.los.value / 2), shape1 = input$shape1, shape2 = input$shape2
               ),
-              qbeta(
+              border.beta(
                 1 - (input$hypothesis.los.value / 2), shape1 = input$shape1, shape2 = input$shape2
               )
             )
@@ -286,8 +293,7 @@ hypothesis.plot <- function(input,smoothing.points) {
       return(switch(
         input$dist,
         'Normal distribution' = {
-          border <-
-            qnorm(input$hypothesis.los.value, mean = input$mu, sd = input$sigma);
+          border <- border.norm(input$hypothesis.los.value, input$mu, input$sigma);
           sf <- stat_function(
             fun = limitRange(
               dnorm, min = outputrange[1], max = border, mean = input$mu,
@@ -297,7 +303,7 @@ hypothesis.plot <- function(input,smoothing.points) {
         },
         'Log-normal distribution' = {
           border <-
-            qlnorm(input$hypothesis.los.value, meanlog = input$mu, sdlog = input$sigma);
+            border.lnorm(input$hypothesis.los.value, input$mu, input$sigma);
           sf <- stat_function(
             fun = limitRange(
               dlnorm, min = outputrange[1], max = border, meanlog = input$mu,
@@ -307,7 +313,7 @@ hypothesis.plot <- function(input,smoothing.points) {
         },
         'Exponential distribution' = {
           border <-
-            qexp((input$hypothesis.los.value), rate = input$rate)
+            border.exp(input$hypothesis.los.value, input$rate)
           sf <-
             stat_function(
               fun = limitRange(
@@ -316,9 +322,10 @@ hypothesis.plot <- function(input,smoothing.points) {
             );
         },
         'Beta distribution' = {
-          border <- qbeta((input$hypothesis.los.value), shape1 = input$shape1,
-                          shape2 = input$shape2
-          )
+          border <- border.beta(input$hypothesis.los.value, 
+                                shape1 = input$shape1, 
+                                shape2 = input$shape2
+                                )
           sf <- stat_function(
             fun = limitRange(
               dbeta, min = outputrange[1], max = border,
@@ -397,7 +404,7 @@ hypothesis.plot <- function(input,smoothing.points) {
         input$dist,
         'Normal distribution' = {
           border <-
-            qnorm(1 - input$hypothesis.los.value, mean = input$mu, sd = input$sigma);
+            border.norm(1-input$hypothesis.los.value, input$mu, input$sigma);
           sf <- stat_function(
             fun = limitRange(
               dnorm, max = outputrange[2], min = border, mean = input$mu,
@@ -407,7 +414,7 @@ hypothesis.plot <- function(input,smoothing.points) {
         },
         'Log-normal distribution' = {
           border <-
-            qlnorm(1 - input$hypothesis.los.value, meanlog = input$mu, sdlog = input$sigma);
+            border.lnorm(1-input$hypothesis.los.value, input$mu, input$sigma);
           sf <- stat_function(
             fun = limitRange(
               dlnorm, max = outputrange[2], min = border, meanlog = input$mu,
@@ -417,7 +424,7 @@ hypothesis.plot <- function(input,smoothing.points) {
         },
         'Exponential distribution' = {
           border <-
-            qexp((1 - input$hypothesis.los.value), rate = input$rate)
+            border.exp(1-input$hypothesis.los.value, input$rate)
           sf <-
             stat_function(
               fun = limitRange(
@@ -426,10 +433,10 @@ hypothesis.plot <- function(input,smoothing.points) {
             );
         },
         'Beta distribution' = {
-          border <-
-            qbeta((1 - input$hypothesis.los.value), shape1 = input$shape1,
-                  shape2 = input$shape2
-            )
+          border <- border.beta(1-input$hypothesis.los.value, 
+                                shape1 = input$shape1, 
+                                shape2 = input$shape2
+          )
           sf <- stat_function(
             fun = limitRange(
               dbeta, max = outputrange[2], min = border,
@@ -521,42 +528,266 @@ crit.value.calculator <- function(input) {
       switch(
         input$test.type,
         'Two-Sided'={
-          output.text <- " IS DIS ENUF OF A PLACEHOLDER?!"
+          output.text <- paste(border.norm(alpha = input$hypothesis.los.value/2,
+                                           mean = input$mu, sd = input$sigma),
+                               "on the left side and",
+                               border.norm(alpha = 1-input$hypothesis.los.value/2,
+                                           mean = input$mu, sd = input$sigma),
+                               "on the right side.");
         },
-        'Left Sided'={
-          output.text <- " IS DIS ENUF OF A PLACEHOLDER?!"
+        'Left-Sided'={
+          output.text <- paste(border.norm(alpha = input$hypothesis.los.value,
+                                           mean = input$mu, sd = input$sigma),
+                               "on the left side");
         },
-        'Right Sided'={
-          output.text <- " IS DIS ENUF OF A PLACEHOLDER?!"
+        'Right-Sided'={
+          output.text <- paste(border.norm(alpha = 1-input$hypothesis.los.value,
+                                           mean = input$mu, sd = input$sigma),
+                               "on the right side");
         }
       )
     },
     'Log-normal distribution' = {
-      output.text <- " IS DIS ENUF OF A PLACEHOLDER?!"
+      switch(
+        input$test.type,
+        'Two-Sided'={
+          output.text <- paste(border.lnorm(input$hypothesis.los.value/2,
+                                            input$mu, input$sigma),
+                               "on the left side and",
+                               border.lnorm(1-input$hypothesis.los.value/2,
+                                            input$mu, input$sigma),
+                               "on the right side.");
+        },
+        'Left-Sided'={
+          output.text <- paste(border.lnorm(input$hypothesis.los.value, input$mu,
+                                            input$sigma),
+                               "on the left side");
+        },
+        'Right-Sided'={
+          output.text <- paste(border.lnorm(1-input$hypothesis.los.value,input$mu,
+                                            input$sigma),
+                               "on the right side");
+        }
+      )
     },
     'Exponential distribution' = {
-      output.text <- " IS DIS ENUF OF A PLACEHOLDER?!"
+      switch(
+        input$test.type,
+        'Two-Sided'={
+          output.text <- paste(border.exp(input$hypothesis.los.value/2,
+                                            input$rate),
+                               "on the left side and",
+                               border.exp(1-input$hypothesis.los.value/2,
+                                            input$rate),
+                               "on the right side.");
+        },
+        'Left-Sided'={
+          output.text <- paste(border.exp(input$hypothesis.los.value,
+                                          input$rate),
+                               "on the left side");
+        },
+        'Right-Sided'={
+          output.text <- paste(border.lnorm(1-input$hypothesis.los.value,input$rate),
+                               "on the right side");
+        }
+      )
     },
     'Beta distribution' = {
-      output.text <- " IS DIS ENUF OF A PLACEHOLDER?!"
+      switch(
+      input$test.type,
+      'Two-Sided'={
+        output.text <- paste(
+          border.beta(
+            (input$hypothesis.los.value / 2), 
+            shape1 = input$shape1, 
+            shape2 = input$shape2
+          ), "on the left side and",
+          border.beta(
+            1 - (input$hypothesis.los.value / 2), 
+            shape1 = input$shape1, 
+            shape2 = input$shape2
+          ), "on the right side.");
+      },
+      'Left-Sided'={
+        output.text <- paste(border.beta(
+          input$hypothesis.los.value, 
+          shape1 = input$shape1, 
+          shape2 = input$shape2
+        ), "on the left side");
+      },
+      'Right-Sided'={
+        output.text <- paste(border.beta(
+          1 - input$hypothesis.los.value, 
+          shape1 = input$shape1, 
+          shape2 = input$shape2
+        ), "on the right side.");
+      });
     },
     'Binomial distribution' = {
-      output.text <- " IS DIS ENUF OF A PLACEHOLDER?!"
+      switch(
+        input$test.type,
+        'Two-Sided'={
+          output.text <- paste(
+            qbinom(
+              (input$hypothesis.los.value / 2), 
+              size = input$size, prob = input$prob
+            ), "on the left side and",
+            qbinom(
+              1 - (input$hypothesis.los.value / 2), 
+              size = input$size, prob = input$prob
+            ), "on the right side.");
+        },
+        'Left-Sided'={
+          output.text <- paste(qbinom(
+            input$hypothesis.los.value, 
+            size = input$size, prob = input$prob
+          ), "on the left side");
+        },
+        'Right-Sided'={
+          output.text <- paste(qbinom(
+            1 - input$hypothesis.los.value, 
+            size = input$size, prob = input$prob
+          ), "on the right side.");
+        });
     },
     'Chi-Square' = {
-      output.text <- " IS DIS ENUF OF A PLACEHOLDER?!"
+      switch(
+        input$test.type,
+        'Two-Sided'={
+          output.text <- paste(
+            qchisq(
+              (input$hypothesis.los.value / 2), 
+              df = input$df
+            ), "on the left side and",
+            qchisq(
+              1-(input$hypothesis.los.value / 2), 
+              df = input$df
+            ), "on the right side.");
+        },
+        'Left-Sided'={
+          output.text <- paste(qchisq(
+            input$hypothesis.los.value, 
+            df = input$df
+          ), "on the left side");
+        },
+        'Right-Sided'={
+          output.text <- paste(qchisq(
+            1 - input$hypothesis.los.value, 
+            df = input$df
+          ), "on the right side.");
+        });
     },
     'Poisson distribution' = {
-      output.text <- " IS DIS ENUF OF A PLACEHOLDER?!"
+      switch(
+        input$test.type,
+        'Two-Sided'={
+          output.text <- paste(
+            qpois(
+              (input$hypothesis.los.value / 2), 
+              lambda = input$lambda
+            ), "on the left side and",
+            qpois(
+              1 - (input$hypothesis.los.value / 2), 
+              lambda = input$lambda
+            ), "on the right side.");
+        },
+        'Left-Sided'={
+          output.text <- paste(qpois(
+            input$hypothesis.los.value, 
+            lambda = input$lambda
+          ), "on the left side");
+        },
+        'Right-Sided'={
+          output.text <- paste(qpois(
+            1 - input$hypothesis.los.value, 
+            lambda = input$lambda
+          ), "on the right side.");
+        });
     },
     't-distribution' = {
-      output.text <- " IS DIS ENUF OF A PLACEHOLDER?!"
+      switch(
+        input$test.type,
+        'Two-Sided'={
+          output.text <- paste(
+            qt(
+              (input$hypothesis.los.value / 2), 
+              df = input$df
+            ), "on the left side and",
+            qt(
+              1 - (input$hypothesis.los.value / 2), 
+              df = input$df
+            ), "on the right side.");
+        },
+        'Left-Sided'={
+          output.text <- paste(qt(
+            input$hypothesis.los.value, 
+            df = input$df
+          ), "on the left side");
+        },
+        'Right-Sided'={
+          output.text <- paste(qt(
+            1 - input$hypothesis.los.value, 
+            df = input$df
+          ), "on the right side.");
+        });
     },
     'F-distribution' = {
-      output.text <- " IS DIS ENUF OF A PLACEHOLDER?!"
+      switch(
+        input$test.type,
+        'Two-Sided'={
+          output.text <- paste(
+            qf(
+              (input$hypothesis.los.value / 2), 
+              df1 = input$df1, df2 = input$df2
+            ), "on the left side and",
+            qf(
+              1 - (input$hypothesis.los.value / 2), 
+              df1 = input$df1, df2 = input$df2
+            ), "on the right side.");
+        },
+        'Left-Sided'={
+          output.text <- paste(qf(
+            input$hypothesis.los.value, 
+            df1 = input$df1, df2 = input$df2
+          ), "on the left side");
+        },
+        'Right-Sided'={
+          output.text <- paste(qf(
+            1 - input$hypothesis.los.value, 
+            df1 = input$df1, df2 = input$df2
+          ), "on the right side.");
+        });
     },
     'Uniform distribution' = {
-      output.text <- " IS DIS ENUF OF A PLACEHOLDER?!"
+      switch(
+        input$test.type,
+        'Two-Sided'={
+          output.text <- paste(
+            qunif(
+              (input$hypothesis.los.value / 2), 
+              min = input$dist.range[1],
+              max = input$dist.range[2]
+            ), "on the left side and",
+            qunif(
+              1 - (input$hypothesis.los.value / 2), 
+              min = input$dist.range[1],
+              max = input$dist.range[2]
+            ), "on the right side.");
+        },
+        'Left-Sided'={
+          output.text <- paste(qunif(
+            input$hypothesis.los.value, 
+            min = input$dist.range[1],
+            max = input$dist.range[2]
+          ), "on the left side");
+        },
+        'Right-Sided'={
+          output.text <- paste(qunif(
+            1 - input$hypothesis.los.value, 
+            min = input$dist.range[1],
+            max = input$dist.range[2]
+          ), "on the right side.");
+        });
     }
   )
   return(output.text)
