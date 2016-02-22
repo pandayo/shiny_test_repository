@@ -118,7 +118,7 @@ hypothesis.plot <- function(input,smoothing.points) {
         'Exponential distribution' = {
           border <-
             c(border.exp(input$hypothesis.los.value/2, input$rate),
-              border.exp(1-input$hypothesis.los.value/2, inputrate))
+              border.exp(1-input$hypothesis.los.value/2, input$rate))
           sf <- c();
           sf <-
             cbind(

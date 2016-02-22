@@ -18,8 +18,14 @@ smoothing.points <- 1001;
 #                                                                            #
 ##############################################################################
 
-shinyServer(function(input, output) {
-  #render the options by the distribution
+shinyServer(function(input, output, session) {
+
+  ############################################################################
+  #                                                                          #
+  #                         Distribution Options                             #
+  #                                                                          #
+  ############################################################################  
+
   output$dist.options <- renderUI({
     allowed.Ranges <- allowed.Ranges(input);
     return(switch(
@@ -124,11 +130,21 @@ shinyServer(function(input, output) {
     ))
   })
   
-  ##############################################################################
-  #                                                                            #
-  #                           Advanced Options                                 #
-  #                                                                            #
-  ##############################################################################
+  #############################################################################
+  #                                                                           #
+  #                          Hypothesis Options                               #
+  #                                                                           #
+  #############################################################################
+  
+  observeEvent(input$dist, {
+    updateCheckboxInput(session, 'add.checkbox', value=F)
+  })
+  
+  #############################################################################
+  #                                                                           #
+  #                          Advanced Options                                 #
+  #                                                                           #
+  #############################################################################
   
   output$option.range <- renderUI({
     allowed.Ranges <- allowed.Ranges(input);

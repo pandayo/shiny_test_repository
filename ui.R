@@ -5,6 +5,7 @@ library(shinythemes)
 shinyUI(
   fluidPage(
     theme = "stylesheet.css",
+    #tags$head(singleton(tags$script(src = 'events.js'))),
     withMathJax(),
     column(width = 12,
            column(width = 10, titlePanel("Distributions"))),
@@ -48,7 +49,7 @@ shinyUI(
                    uiOutput('option.smoothing.points')
                  ))
       ),
-      fluidRow(        actionButton("draw.Plot","Draw distribution"))
+      fluidRow(actionButton("draw.Plot","Draw distribution"))
     ),
     mainPanel(width = 9,
               plotOutput('dist.Plot'),
